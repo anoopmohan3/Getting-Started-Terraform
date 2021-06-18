@@ -78,16 +78,16 @@ resource "aws_subnet" "subnet1" {
   availability_zone       = data.aws_availability_zones.available.names[0]
 
 }
-
+##*** subnet2 created with the same settings as subnet1**##
 resource "aws_subnet" "subnet2" {
   cidr_block              = var.subnet2_address_space
   vpc_id                  = aws_vpc.vpc.id
   map_public_ip_on_launch = "true"
-  availability_zone       = data.aws_availability_zones.available.names[1]
+  availability_zone       = data.aws_availability_zones.available.names[1] ##take the second Availablity zone list##
 
 }
 
-# ROUTING #
+# ROUTING table  #
 resource "aws_route_table" "rtb" {
   vpc_id = aws_vpc.vpc.id
 
@@ -107,7 +107,8 @@ resource "aws_route_table_association" "rta-subnet2" {
   route_table_id = aws_route_table.rtb.id
 }
 
-# SECURITY GROUPS #
+# SECURITY GROUPS # Here created subnet for ELB#
+
 resource "aws_security_group" "elb-sg" {
   name   = "nginx_elb_sg"
   vpc_id = aws_vpc.vpc.id
@@ -168,9 +169,9 @@ resource "aws_elb" "web" {
   instances       = [aws_instance.nginx1.id, aws_instance.nginx2.id]
 
   listener {
-    instance_port     = 80
+    instance_port     = 80 # what port is to connect the instance# 
     instance_protocol = "http"
-    lb_port           = 80
+    lb_port           = 80 # what port is open for the outside to serve traffic#
     lb_protocol       = "http"
   }
 }
@@ -201,6 +202,7 @@ resource "aws_instance" "nginx1" {
   }
 }
 
+# here subnet id is diffent compared to other file
 resource "aws_instance" "nginx2" {
   ami                    = data.aws_ami.aws-linux.id
   instance_type          = "t2.micro"
@@ -215,7 +217,7 @@ resource "aws_instance" "nginx2" {
     private_key = file(var.private_key_path)
 
   }
-
+#**color has been chages**#
   provisioner "remote-exec" {
     inline = [
       "sudo yum install nginx -y",
